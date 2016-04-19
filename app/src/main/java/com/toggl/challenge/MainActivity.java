@@ -12,6 +12,7 @@ import com.kontakt.sdk.android.ble.configuration.scan.EddystoneScanContext;
 import com.kontakt.sdk.android.ble.configuration.scan.IBeaconScanContext;
 import com.kontakt.sdk.android.ble.connection.OnServiceReadyListener;
 import com.kontakt.sdk.android.ble.discovery.BluetoothDeviceEvent;
+import com.kontakt.sdk.android.ble.discovery.EventType;
 import com.kontakt.sdk.android.ble.filter.ibeacon.IBeaconFilters;
 import com.kontakt.sdk.android.ble.filter.ibeacon.IBeaconUniqueIdFilter;
 import com.kontakt.sdk.android.ble.manager.ProximityManager;
@@ -86,24 +87,26 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
     public void onEvent(BluetoothDeviceEvent bluetoothDeviceEvent) {
         List<? extends RemoteBluetoothDevice> deviceList = bluetoothDeviceEvent.getDeviceList();
 
-        if (deviceList.size() > 0) {
+        if (deviceList.size() > 0 && bluetoothDeviceEvent.getEventType() == EventType.DEVICES_UPDATE) {
             for (Iterator<? extends RemoteBluetoothDevice> i = deviceList.iterator(); i.hasNext();) {
                 RemoteBluetoothDevice device = i.next();
                 TextView t = getTextViewForDeviceId(device.getUniqueId());
-                double distance = device.getDistance() * 10;
 
-                t.setText(device.getUniqueId() + " " + String.valueOf(distance));
-                if (distance < 10) {
-                    switch (device.getUniqueId()) {
-                        case BATHROOM:
-                            trackingText = "Tracking taking a crap";
-                            break;
-                        case KITCHEN:
-                            trackingText = "Tracking cooking";
-                            break;
-                        case LIVINGROOM:
-                            trackingText = "Tracking relaxing";
-                            break;
+                if (t != null) {
+                    double distance = device.getDistance() * 10;
+                    t.setText(device.getUniqueId() + " " + String.valueOf(distance));
+                    if (distance < 10) {
+                        switch (device.getUniqueId()) {
+                            case BATHROOM:
+                                trackingText = "Tracking showe";
+                                break;
+                            case KITCHEN:
+                                trackingText = "Tracking cooking";
+                                break;
+                            case LIVINGROOM:
+                                trackingText = "Tracking relaxing";
+                                break;
+                        }
                     }
                 }
             }
@@ -141,16 +144,14 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
 
         IBeaconScanContext ibeaconScanContext = new IBeaconScanContext.Builder()
                 .setIBeaconFilters(filters)
+                .setDevicesUpdateCallbackInterval(1000)
                 .build();
         if (scanContext == null) {
             scanContext = new ScanContext.Builder()
-                    .setScanPeriod(new ScanPeriod(3000, 2000)) // or for monitoring for 15 seconds scan and 10 seconds waiting:
+                    .setScanPeriod(ScanPeriod.RANGING) // or for monitoring for 15 seconds scan and 10 seconds waiting:
                     //.setScanPeriod(new ScanPeriod(TimeUnit.SECONDS.toMillis(15), TimeUnit.SECONDS.toMillis(10)))
                     .setScanMode(ProximityManager.SCAN_MODE_BALANCED)
                     .setActivityCheckConfiguration(ActivityCheckConfiguration.MINIMAL)
-                    .setForceScanConfiguration(ForceScanConfiguration.MINIMAL)
-                    .setIBeaconScanContext(new IBeaconScanContext.Builder().build())
-                    .setEddystoneScanContext(new EddystoneScanContext.Builder().build())
                     .setForceScanConfiguration(ForceScanConfiguration.MINIMAL)
                     .setIBeaconScanContext(ibeaconScanContext)
                     .build();
@@ -171,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
                 t = t3;
                 break;
             default:
-                t = t1;
+                t = null;
                 break;
         }
 
