@@ -9,6 +9,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.toggl.challenge.MainActivity">
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/background_logo"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/toggl_logo_dark"
+        android:layout_alignParentEnd="false" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,29 +27,77 @@
         android:layout_centerHorizontal="true" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="New Text"
         android:id="@+id/text1"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="New Text"
         android:id="@+id/text2"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/text1"
-        android:layout_alignEnd="@+id/text1" />
+        android:layout_above="@+id/text1"
+        android:layout_alignParentLeft="true" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="New Text"
         android:id="@+id/text3"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/text2"
-        android:layout_alignEnd="@+id/text2" />
+        android:layout_above="@+id/text2"
+        android:layout_alignParentLeft="true" />
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/input_description"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:editable="true"
+        android:singleLine="true"
+        android:hint="Enter Description" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="test"
+        android:id="@+id/button_test"
+        android:layout_above="@+id/text3"
+        android:layout_alignParentEnd="true"
+        android:singleLine="true"
+        android:onClick="onClickTest" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/text_duration"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="82dp"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:typeface="normal"
+        android:text="00:00" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/text_duration2"
+        android:textSize="80dp"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:typeface="normal"
+        android:text="00:00"
+        android:layout_alignBottom="@+id/text_duration"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

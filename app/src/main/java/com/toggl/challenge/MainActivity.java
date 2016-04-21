@@ -3,6 +3,11 @@ package com.toggl.challenge;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.kontakt.sdk.android.ble.configuration.ActivityCheckConfiguration;
 import com.kontakt.sdk.android.ble.configuration.ForceScanConfiguration;
@@ -24,6 +29,17 @@ import com.kontakt.sdk.android.manager.KontaktProximityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.w3c.dom.Text;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements ProximityManager.ProximityListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -36,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
     private boolean timerRunnning = false;
     private static final String START = "jGeF";
     private static final String FINISH = "3xDF";
+    private Timer localTimer = null;
+    public Date timerStart = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +61,16 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         setContentView(R.layout.activity_main);
         KontaktSDK.initialize("BbYSubZhSaaJMAogJNQwRGlykAkpClCZ");
         proximityManager = new KontaktProximityManager(this);
+    }
+
+    public void onClickTest(View view) {
+        if(this.localTimer == null) {
+            this.swapTrackingImage(true);
+            this.startLocalTimer();
+        } else {
+            this.swapTrackingImage(false);
+            this.stopLocalTimer();
+        }
     }
 
     @Override
@@ -169,5 +197,56 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
 
     public void setTimeEntryID (String id) {
         timeEntryID = id;
+    }
+
+    protected void startLocalTimer() {
+        this.timerStart = new Date();
+        if(this.localTimer != null) {
+            this.stopLocalTimer();
+        }
+        this.localTimer = new Timer();
+        this.localTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                timerTickProxy();
+            }
+        }, 0, 40);
+    }
+
+    private void stopLocalTimer() {
+        if(this.localTimer != null) {
+            this.localTimer.cancel();
+            this.localTimer = null;
+        }
+    }
+
+    private void timerTickProxy() {
+        this.runOnUiThread(TimerTick);
+    }
+
+    private Runnable TimerTick = new Runnable() {
+        public void run() {
+            TextView view = (TextView) findViewById(R.id.text_duration);
+            TextView view2 = (TextView) findViewById(R.id.text_duration2);
+            long duration = new Date().getTime() - MainActivity.this.timerStart.getTime();
+            int minutes =  (int) Math.floor(duration / 1000d / 60d);
+            int seconds = (int) Math.floor(duration / 1000d);
+            int milliseconds = (int) ((duration - (minutes * 1000d * 60d) - (seconds * 1000d)) / 10d);
+            String text = (minutes > 0d ? String.format("%02d", minutes) + ":" : "")
+                    + String.format("%02d", seconds) + ":"
+                    + String.format("%02d", milliseconds);
+            view.setText(text);
+            view2.setText(text);
+        }
+    };
+
+    String getDescription() {
+        EditText textView = (EditText) findViewById(R.id.input_description);
+        return textView.getText().toString();
+    }
+
+    void swapTrackingImage(Boolean isTracking) {
+        ImageView imageView = (ImageView) findViewById(R.id.background_logo);
+        imageView.setImageResource(isTracking ? R.drawable.toggl_logo : R.drawable.toggl_logo_dark);
     }
 }
