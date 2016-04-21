@@ -16,15 +16,17 @@ import java.net.URL;
 /**
  * Created by luiz on 4/20/16.
  */
-public class TimerService extends AsyncTask<String, Void, String> {
+public class StartTimerTask extends AsyncTask<MainActivity, Void, String> {
 
-    private final String URL = "https://www.toggl.com/api/v8/time_entries";
+    private final String URL = "https://www.toggl.com/api/v8/time_entries/start";
+    private final String requestBody = "{\"time_entry\": {\"created_with\": \"team 1 app\", \"description\": \"Workout\"}}";
 
-    public TimerService () {
+    public StartTimerTask() {
 
     }
 
-    protected String doInBackground(String... params) {
+    protected String doInBackground(MainActivity... activities) {
+        MainActivity activity = activities[0];
         HttpURLConnection connection = null;
         JSONObject json = null;
         try {
@@ -36,10 +38,9 @@ public class TimerService extends AsyncTask<String, Void, String> {
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Authorization", "Basic NDgxMDNlZDYzYjliYTg0N2FiMDJiZmY3ZTYxMDRhM2E6YXBpX3Rva2Vu");
-            connection.setRequestProperty("Body", "{\"time_entry\": {\"created_with\": \"postman\"}}");
 
             OutputStream os = connection.getOutputStream();
-            os.write("{\"time_entry\": {\"created_with\": \"group 1 app\"}}".getBytes("UTF-8"));
+            os.write(requestBody.getBytes("UTF-8"));
             os.close();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -51,6 +52,14 @@ public class TimerService extends AsyncTask<String, Void, String> {
             br.close();
             json = new JSONObject(sb.toString());
             Log.d("HTTP", json.toString());
+            if (json != null) {
+                JSONObject data = (JSONObject) json.get("data");
+                String id = String.valueOf((Integer) data.get("id"));
+                activity.setTimeEntryID(id);
+                return id;
+            } else {
+                return json.toString();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -58,7 +67,7 @@ public class TimerService extends AsyncTask<String, Void, String> {
                 connection.disconnect();
             }
         }
-
-        return json != null ? json.toString() : "";
+        return null;
     }
+
 }
