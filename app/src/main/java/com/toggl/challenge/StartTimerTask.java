@@ -16,10 +16,10 @@ import java.net.URL;
 /**
  * Created by luiz on 4/20/16.
  */
-public class StartTimerTask extends AsyncTask<MainActivity, Void, String> {
+public class StartTimerTask extends AsyncTask<MainActivity, String, String> {
 
     private final String URL = "https://www.toggl.com/api/v8/time_entries/start";
-    private final String requestBody = "{\"time_entry\": {\"created_with\": \"team 1 app\", \"description\": \"Workout\"}}";
+    private final String requestBody = "{\"time_entry\": {\"created_with\": \"team 1 app\", \"description\": \"%s\"}}";
 
     public StartTimerTask() {
 
@@ -40,7 +40,7 @@ public class StartTimerTask extends AsyncTask<MainActivity, Void, String> {
             connection.setRequestProperty("Authorization", "Basic NDgxMDNlZDYzYjliYTg0N2FiMDJiZmY3ZTYxMDRhM2E6YXBpX3Rva2Vu");
 
             OutputStream os = connection.getOutputStream();
-            os.write(requestBody.getBytes("UTF-8"));
+            os.write(String.format(requestBody, activity.getDescription()).getBytes("UTF-8"));
             os.close();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));

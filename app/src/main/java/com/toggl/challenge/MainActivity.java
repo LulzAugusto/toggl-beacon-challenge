@@ -65,9 +65,11 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
 
     public void onClickTest(View view) {
         if(this.localTimer == null) {
+            new StartTimerTask().execute(this);
             this.swapTrackingImage(true);
             this.startLocalTimer();
         } else {
+            new StopTimerTask().execute(timeEntryID);
             this.swapTrackingImage(false);
             this.stopLocalTimer();
         }
@@ -131,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
                 // START TIMER
                 new StartTimerTask().execute(this);
                 timerRunnning = true;
+                this.swapTrackingImage(true);
+                this.startLocalTimer();
                 Log.d(TAG, "start timer");
             }
 
@@ -144,6 +148,9 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
                     new StopTimerTask().execute(timeEntryID);
                     timerRunnning = false;
                     startDeviceDetected = false;
+                    this.swapTrackingImage(false);
+                    this.stopLocalTimer();
+                    setTimeEntryID("");
                 }
 
             }
@@ -168,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
 
         IBeaconScanContext ibeaconScanContext = new IBeaconScanContext.Builder()
                 .setIBeaconFilters(filters)
-                .setDevicesUpdateCallbackInterval(1000)
+                .setDevicesUpdateCallbackInterval(100)
                 .build();
         if (scanContext == null) {
             scanContext = new ScanContext.Builder()
