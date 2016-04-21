@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.android.internal.util.Predicate;
 import com.kontakt.sdk.android.ble.configuration.ActivityCheckConfiguration;
 import com.kontakt.sdk.android.ble.configuration.ForceScanConfiguration;
 import com.kontakt.sdk.android.ble.configuration.ScanPeriod;
-import com.kontakt.sdk.android.ble.configuration.scan.EddystoneScanContext;
 import com.kontakt.sdk.android.ble.configuration.scan.IBeaconScanContext;
 import com.kontakt.sdk.android.ble.connection.OnServiceReadyListener;
 import com.kontakt.sdk.android.ble.discovery.BluetoothDeviceEvent;
@@ -27,6 +27,7 @@ import com.kontakt.sdk.android.manager.KontaktProximityManager;
 import org.w3c.dom.Text;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,16 +37,10 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
     private ProximityManagerContract proximityManager;
     private ScanContext scanContext;
 
-    private TextView trackingTextView;
-    private TextView t1;
-    private TextView t2;
-    private TextView t3;
-
-    private String trackingText = "";
-
-    private static final String BATHROOM = "0AvC";
-    private static final String KITCHEN = "3xDF";
-    private static final String LIVINGROOM = "jGeF";
+    private boolean startDeviceDetected = false;
+    private boolean timerRunnning = false;
+    private static final String START = "0AvC";
+    private static final String FINISH = "3xDF";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +48,6 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         setContentView(R.layout.activity_main);
         KontaktSDK.initialize("BbYSubZhSaaJMAogJNQwRGlykAkpClCZ");
         proximityManager = new KontaktProximityManager(this);
-
-        t1 = (TextView) findViewById(R.id.text1);
-        t2 = (TextView) findViewById(R.id.text2);
-        t3 = (TextView) findViewById(R.id.text3);
-        trackingTextView = (TextView) findViewById(R.id.tracking);
     }
 
     @Override
@@ -87,59 +77,55 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
     public void onEvent(BluetoothDeviceEvent bluetoothDeviceEvent) {
         List<? extends RemoteBluetoothDevice> deviceList = bluetoothDeviceEvent.getDeviceList();
 
-        if (deviceList.size() > 0 && bluetoothDeviceEvent.getEventType() == EventType.DEVICES_UPDATE) {
-            for (Iterator<? extends RemoteBluetoothDevice> i = deviceList.iterator(); i.hasNext();) {
-                RemoteBluetoothDevice device = i.next();
-                TextView t = getTextViewForDeviceId(device.getUniqueId());
+        if (bluetoothDeviceEvent.getEventType() == EventType.DEVICE_DISCOVERED &&
+                !startDeviceDetected &&
+                !timerRunnning) {
+            RemoteBluetoothDevice device = getDeviceById(deviceList, START);
 
-                if (t != null) {
-                    double distance = device.getDistance() * 10;
-                    t.setText(device.getUniqueId() + " " + String.valueOf(distance));
-                    if (distance < 10) {
-                        switch (device.getUniqueId()) {
-                            case BATHROOM:
-                                trackingText = "Tracking showe";
-                                break;
-                            case KITCHEN:
-                                trackingText = "Tracking cooking";
-                                break;
-                            case LIVINGROOM:
-                                trackingText = "Tracking relaxing";
-                                break;
-                        }
-                    }
-                }
+            if (device != null) {
+                startDeviceDetected = true;
+                Log.d(TAG, "start detected");
+            }
+        }
+
+        if (bluetoothDeviceEvent.getEventType() == EventType.DEVICES_UPDATE) {
+            RemoteBluetoothDevice startDevice = getDeviceById(deviceList, START);
+            RemoteBluetoothDevice finishDevice = getDeviceById(deviceList, FINISH);
+
+            if (!timerRunnning &&
+                    startDeviceDetected &&
+                    (startDevice != null) &&
+                    (startDevice.getProximity() == Proximity.FAR)) {
+                // START TIMER
+                new TimerService().execute("");
+                timerRunnning = true;
+                Log.d(TAG, "start timer");
             }
 
-            if (trackingText.length() == 0) {
-                trackingText = "";
-            }
 
-            if (trackingText.length() > 0) {
-                trackingTextView.setText(trackingText);
-            } else {
-                trackingTextView.setText("Tracking something else");
+            if (timerRunnning &&
+                    (finishDevice != null) &&
+                    (finishDevice.getProximity() == Proximity.IMMEDIATE)) {
+                Log.d(TAG, "stop timer");
+                timerRunnning = false;
             }
         }
     }
 
     @Override
     public void onScanStart() {
-        Log.d(TAG, "scan started");
+//        Log.d(TAG, "scan started");
     }
 
     @Override
     public void onScanStop() {
-        Log.d(TAG, "scan stopped");
-
+//        Log.d(TAG, "scan stopped");
     }
-
 
     private ScanContext getScanContext() {
         List<IBeaconUniqueIdFilter> filters = Arrays.asList(
                 IBeaconFilters.newUniqueIdFilter("3xDF"),
-                IBeaconFilters.newUniqueIdFilter("0AvC"),
-                IBeaconFilters.newUniqueIdFilter("jGeF")
+                IBeaconFilters.newUniqueIdFilter("0AvC")
         );
 
         IBeaconScanContext ibeaconScanContext = new IBeaconScanContext.Builder()
@@ -159,23 +145,15 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         return scanContext;
     }
 
-    private TextView getTextViewForDeviceId (String id) {
-        TextView t;
-        switch (id) {
-            case BATHROOM:
-                t = t1;
-                break;
-            case KITCHEN:
-                t = t2;
-                break;
-            case LIVINGROOM:
-                t = t3;
-                break;
-            default:
-                t = null;
-                break;
+    RemoteBluetoothDevice getDeviceById (List<? extends RemoteBluetoothDevice> list, String id) {
+        RemoteBluetoothDevice result = null;
+
+        for (RemoteBluetoothDevice device : list) {
+            if (device.getUniqueId().equals(id)) {
+                result = device;
+            }
         }
 
-        return t;
+        return result;
     }
 }
