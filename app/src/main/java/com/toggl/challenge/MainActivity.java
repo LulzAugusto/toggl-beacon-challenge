@@ -54,6 +54,40 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
     private static final String FINISH = "3xDF";
     private Timer localTimer = null;
     public Date timerStart = null;
+    private BeaconEmitter beaconEmitter = new BeaconEmitter(new BeaconListener() {
+        @Override
+        public void onScanStart() {
+            onBeaconScanStart();
+        }
+
+        @Override
+        public void onScanStop() {
+            onBeaconScanStop();
+        }
+        @Override
+        public void onEvent(BluetoothDeviceEvent bluetoothDeviceEvent) {
+            onBeaconEvent(bluetoothDeviceEvent);
+        }
+    });
+
+    @Override
+    public void onScanStart() { // Proxy to beaconEmitter
+        Log.d(TAG, "Proxy scan start");
+        this.beaconEmitter.onScanStart();
+    }
+
+    @Override
+    public void onScanStop() { // Proxy to beaconEmitter
+        Log.d(TAG, "Proxy scan stop");
+        this.beaconEmitter.onScanStop();
+    }
+
+    @Override
+    public void onEvent(BluetoothDeviceEvent bluetoothDeviceEvent) { // Proxy to beaconEmitter
+        Log.d(TAG, "Proxy scan event");
+        this.beaconEmitter.onEvent(bluetoothDeviceEvent);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +130,7 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         proximityManager.disconnect();
     }
 
-    @Override
-    public void onEvent(BluetoothDeviceEvent bluetoothDeviceEvent) {
+    public void onBeaconEvent(BluetoothDeviceEvent bluetoothDeviceEvent) {
         Log.d("TEID", timeEntryID != null ? timeEntryID : "nothing to see here");
         List<? extends RemoteBluetoothDevice> deviceList = bluetoothDeviceEvent.getDeviceList();
 
@@ -150,13 +183,11 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         }
     }
 
-    @Override
-    public void onScanStart() {
+    public void onBeaconScanStart() {
 //        Log.d(TAG, "scan started");
     }
 
-    @Override
-    public void onScanStop() {
+    public void onBeaconScanStop() {
 //        Log.d(TAG, "scan stopped");
     }
 
