@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -254,6 +255,6 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
 
     void swapTrackingImage(Boolean isTracking) {
         ImageView imageView = (ImageView) findViewById(R.id.background_logo);
-        imageView.setImageResource(isTracking ? R.drawable.toggl_logo : R.drawable.toggl_logo_dark);
+        imageView.setImageResource(isTracking ? R.drawable.background_poster_2 : R.drawable.background_poster);
     }
 }
