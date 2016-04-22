@@ -236,10 +236,10 @@ public class MainActivity extends AppCompatActivity implements ProximityManager.
         public void run() {
             TextView view = (TextView) findViewById(R.id.text_duration);
             TextView view2 = (TextView) findViewById(R.id.text_duration2);
-            long duration = new Date().getTime() - MainActivity.this.timerStart.getTime();
-            int minutes =  (int) Math.floor(duration / 1000d / 60d);
-            int seconds = (int) Math.floor(duration / 1000d);
-            int milliseconds = (int) ((duration - (minutes * 1000d * 60d) - (seconds * 1000d)) / 10d);
+            int duration = (int) (new Date().getTime() - MainActivity.this.timerStart.getTime());
+            int minutes =  (int) Math.floor(duration / 1000 / 60);
+            int seconds = (int) Math.floor(duration - minutes * 1000 * 60) / 1000;
+            int milliseconds = (int) Math.floor((duration - minutes * 1000 * 60 - seconds * 1000) / 10);
             String text = (minutes > 0d ? String.format("%02d", minutes) + ":" : "")
                     + String.format("%02d", seconds) + ":"
                     + String.format("%02d", milliseconds);
